@@ -16,8 +16,8 @@ app.listen(port, (req, res) =>{
   console.log(`Server started at port ${port}...`)
 });
 
-const category = require('./routes/api/category');
-// const product = require('./routes/api/product');
+const category = require('./routes/category');
+const product = require('./routes/product');
 
 app.use(category)
-// app.use(product)
+app.use(product)

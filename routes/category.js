@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const sequelize = require('../../config/db/Sequelize');
-const category = require('../../models/category')
+const sequelize = require('../config/db/Sequelize');
+const category = require('../models/category')
 
 /**
  * @route GET api/category/test
- * @desc Test Guru Route
+ * @desc Test Category Route
  * @access Public
  */
 
@@ -16,11 +16,11 @@ router.get('/test', (req, res) => {
 router.get('/category', (req, res) => {
     sequelize.sync().then(() => {
         category.update({
-            category_name: 'Baju Baru'
+            category_name: 'Sepatu Bola'
         },
         {
             where: {
-                category_name: 'Sepatu Bola'
+                category_name: 'Baju Baru'
             }
         }
         ).then((result) => {
