@@ -15,5 +15,14 @@
   "bugs": {
     "url": "https://github.com/ahmdichsan/simple_crud/issues"
   },
-  "homepage": "https://github.com/ahmdichsan/simple_crud#readme"
+  "homepage": "https://github.com/ahmdichsan/simple_crud#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "mysql": "^2.16.0",
+    "mysql2": "^1.6.1",
+    "sequelize": "^4.38.1"
+  }
 }
