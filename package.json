@@ -1,0 +1,19 @@
+{
+  "name": "meteor_backend_test",
+  "version": "1.0.0",
+  "description": "meteor_backend_test",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmdichsan/simple_crud.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ahmdichsan/simple_crud/issues"
+  },
+  "homepage": "https://github.com/ahmdichsan/simple_crud#readme"
+}
