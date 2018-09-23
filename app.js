@@ -7,11 +7,13 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+/** Cors to make the server accessible */
 const cors = require('cors');
 app.use(cors());
 
 /** Port configuration */
-const port = process.env.PORT || 8080;
+const env = require('./config/db/env')
+const port = env.PORT;
 app.listen(port, (req, res) =>{
   console.log(`Server started at port ${port}...`)
 });

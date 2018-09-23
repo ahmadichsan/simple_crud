@@ -73,13 +73,17 @@ router.get('/product_test4', (req, res) => {
 
 router.get('/product_test5', (req, res) => {
     // res.json({msg: 'Product route success'});
-    // inner join category with product
+    // inner join category with product and product code
     sequelize.sync().then(() => {
         models.product.findAll({
             include: [{
               model: models.category,
               required: true,
               attributes: ['category_name']
+            }, {
+                model: models.product_code,
+                required: true,
+                attributes: ['product_code']
             }]
           })
           .then((result) => {
@@ -124,7 +128,7 @@ router.get('/readproduct', (req, res) => {
             res.status(200)
             .json(results)
         })
-    })  
+    })
 })
 
 /**

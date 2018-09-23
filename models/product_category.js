@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize')
 const sequelize = require('../config/db/Sequelize');
 
-var product_category = sequelize.define('product_category', {
+const product_category = sequelize.define('product_category', {
         id : {
             type : Sequelize.INTEGER,
             primaryKey : true,
@@ -22,3 +22,11 @@ var product_category = sequelize.define('product_category', {
 );
 
 module.exports = product_category
+
+/**
+ * Note:
+ * timestamps set to be false in order to prevent Sequelize automatically create a createdAt and updatedAt columns, which
+ * not exist in the table
+ * 
+ * freezeTableName set to be true in order to prevent Sequelize from rename the table name
+ */

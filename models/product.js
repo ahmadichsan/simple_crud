@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize')
 const sequelize = require('../config/db/Sequelize');
 
-var product = sequelize.define('master_product', {
+const product = sequelize.define('master_product', {
         id : {
             type : Sequelize.INTEGER,
             primaryKey : true,
@@ -19,3 +19,11 @@ var product = sequelize.define('master_product', {
 );
 
 module.exports = product
+
+/**
+ * Note:
+ * timestamps set to be false in order to prevent Sequelize automatically create a createdAt and updatedAt columns, which
+ * not exist in the table
+ * 
+ * freezeTableName set to be true in order to prevent Sequelize from rename the table name
+ */
