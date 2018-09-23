@@ -1,24 +1,21 @@
 const Sequelize = require('sequelize')
 const sequelize = require('../config/db/Sequelize');
 
-var product_category = sequelize.define('product_category', {
+var product = sequelize.define('master_product', {
         id : {
             type : Sequelize.INTEGER,
             primaryKey : true,
             autoIncrement : true
         },
-        product_id : {
-            type : Sequelize.INTEGER,
-        },
-        category_id : {
-            type : Sequelize.INTEGER,
-        },
+        product_name : {
+            type : Sequelize.CHAR
+        }
     },
     {
-        tableName: 'product_category',
+        tableName: 'master_product',
         freezeTableName: true,
         timestamps: false
     }
 );
 
-module.exports = product_category
+module.exports = product

@@ -18,6 +18,8 @@ app.listen(port, (req, res) =>{
 
 const category = require('./routes/category');
 const product = require('./routes/product');
+const product_category = require('./routes/product_category');
 
 app.use(category)
 app.use(product)
+app.use(product_category)

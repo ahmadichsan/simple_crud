@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize')
 const sequelize = require('../config/db/Sequelize');
 
-var product_code = sequelize.define('product_code', {
+const product_code = sequelize.define('product_code', {
         id : {
             type : Sequelize.INTEGER,
             primaryKey : true,
@@ -9,10 +9,6 @@ var product_code = sequelize.define('product_code', {
         },
         product_id : {
             type : Sequelize.INTEGER,
-            references: {
-                model: 'master_product',
-                key: 'id'
-            }
         },
         product_code : {
             type : Sequelize.CHAR,
@@ -20,9 +16,9 @@ var product_code = sequelize.define('product_code', {
         }
     },
     {
-        tableName: 'product_code',
-        freezeTableName: true,
-        timestamps: false
+        tableName : 'product_code',
+        freezeTableName : true,
+        timestamps : false,
     }
 );
 

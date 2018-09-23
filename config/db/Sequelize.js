@@ -1,10 +1,11 @@
-const Sequelize = require('sequelize')
-const Op = Sequelize.Op
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+const env = require('./env');
 
-const sequelize = new Sequelize('meteor_test', 'root', 'root', {
-  host: 'localhost',
-  port: 3306,
-  dialect: 'mysql',
+const sequelize = new Sequelize(env.DATABASE_NAME, env.DATABASE_USERNAME, env.DATABASE_PASSWORD, {
+  host: env.DATABASE_HOST,
+  port: env.DATABASE_PORT,
+  dialect: env.DATABASE_DIALECT,
   operatorsAliases: {
     $and: Op.and,
     $or: Op.or,
