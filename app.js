@@ -22,8 +22,10 @@ const category = require('./routes/category');
 const product = require('./routes/product');
 const product_category = require('./routes/product_category');
 const product_code = require('./routes/product_code');
+const login = require('./routes/login')
 
 app.use(category)
 app.use(product)
 app.use(product_category)
 app.use(product_code)
+app.use(login)
