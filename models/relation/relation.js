@@ -3,6 +3,7 @@ const product = require('../../models/product');
 const category = require('../../models/category');
 const product_category = require('../../models/product_category');
 const product_code = require('../../models/product_code');
+const user = require('../../models/user')
 
 // Relations
 product.belongsToMany(category, { 
@@ -37,7 +38,8 @@ const models = {
     product: product,
     category: category,
     product_category: product_category,
-    product_code: product_code  
+    product_code: product_code,
+    user: user
 }
 // make all model accessible just with models object
 

@@ -1,5 +1,5 @@
 //Autorization : Bearer <access_token>
-module.exports = verifyToken = (req,res, next)=>{
+module.exports = verifyToken = (req, res, next)=>{
     //get auth header value
     const bearerHeader=req.headers['authorization'];
     // check if bearear is undefined

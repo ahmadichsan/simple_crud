@@ -1,60 +1,61 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+const verifyToken = require ('../config/key/verifyToken');
+const sequelize = require('../config/db/Sequelize');
+const models = require('../models/relation/relation');
 
-/**configuration for JWT */
-const jwt =require('jsonwebtoken');
-
-/** authorization config*/
-const verifyToken= require ('../config/key/verifyToken')
-
-/** route for login validation
- * @desc login validation and sign json web token
+/**
+ * @route GET login/logintest
+ * @desc Test Login Route
+ * @access Public
  */
 
+router.get('/logintest', (req, res) => {
+    res.json({msg: 'Login route success'});
+})
  
-//The login section is to create a token using jwt 
-router.post('/login', (req,res)=>{  
-const userlogin = [
-    {
-        id : 'userid01',
-        username : 'rathon',
-        password : 'asdf1234'
-    },
-    {
-        id : 'userid02',
-        username : 'udin',
-        password : 'mantap1234'
-    }
-]        
-    var username =req.body.username;    
-    var userpassword=req.body.password;    
-    for(var i = 0; i<userlogin.length; i++){
-        if(username === userlogin[i].username && userpassword === userlogin[i].password){
-           console.log('berhasil masuk')      
-                jwt.sign({userlogin}, 'secretkey', {expiresIn: '30s'}, (err, token)=>{
-                   res.json({
-                        token: `Bearer `+ token,
-                        msg: `Login success`
-                        })
-                    });    
-                  break;  
-        } else if ( i === userlogin.length-1){
-            console.log('gagal masuk')
-        }
-    }
+/**
+ * @route POST login/login
+ * @desc Test Login Route
+ * @access Public
+ */
+
+router.post('/login', (req,res)=> {  
+    var username = req.body.username;
+    var password = req.body.password;
+
+    sequelize.sync().then(() => {
+        models.user.findAll({
+            where : {
+                username : username
+            }
+        })
+        .then((result) => {
+            // console.log(result[0].password)
+            var dbpassword = result[0].password
+            if (dbpassword === password) {
+                jwt.sign({username}, 'secret', { expiresIn: '3600s' }, (err, token) => {
+                    res.status(200).json({
+                        token: 'Bearer ' + token
+                    })
+                }) 
+            } else {
+                res.status(401).json({msg: 'user data not found'})
+            }
+        })
+    })
 })
 
-// test section, first test for authorization
-router.get('/testproteksi', verifyToken, (req, res) => {    
-    jwt.verify(req.token, 'secretkey', (err, authData)=>{
-        if (err){
-            res.sendStatus(403)
-        }else{
-            res.json({
-                message: 'berhasil masuk',
-                authData
-            })
-        }
+/**
+ * @route GET login/protectiontest
+ * @desc Test Login Protected Route
+ * @access Private
+ */
+
+router.get('/protectiontest', verifyToken, (req, res) => {    
+    jwt.verify(req.token, 'secret', (err, authData) => {
+        (err) ? res.status(401).json({ msg: 'unauthorized' }) : res.json({ msg: 'login success', authData })
     })
 })
 

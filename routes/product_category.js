@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+const verifyToken = require ('../config/key/verifyToken');
 const sequelize = require('../config/db/Sequelize');
 const models = require('../models/relation/relation');
 
@@ -16,7 +18,7 @@ router.get('/prodcattest', (req, res) => {
 /**
  * @route GET product_category/readprodcat
  * @desc Read Product Category (product as source and category as target, through product_category model)
- * @access Private
+ * @access Public
  */
 
 router.get('/readprodcat', (req, res) => {
@@ -37,7 +39,7 @@ router.get('/readprodcat', (req, res) => {
 /**
  * @route GET product_category/readcatprod
  * @desc Read Product Category (category as source and product as target, through product_category model)
- * @access Private
+ * @access Public
  */
 
 router.get('/readcatprod', (req, res) => {
@@ -62,23 +64,28 @@ router.get('/readcatprod', (req, res) => {
  * @access Private
  */
 
-router.post('/updatecatprod', (req, res) => {
-    var product_category_id = req.body.product_category_id
-    var new_category_id = req.body.new_category_id
-    sequelize.sync().then(() => {
-        models.product_category.update({
-            category_id: new_category_id
-        },
-        {
-            where: {
-                id: product_category_id
-            }
-        })
-        .then((result) => {
-            var affectedRow = result[0]
-            if (affectedRow === 0) res.status(412).json({msg: 'updating failed due to invalid product_category id value'})
-            else res.status(200).json({msg: 'update success'})
-        })
+router.post('/updatecatprod', verifyToken, (req, res) => {
+    jwt.verify(req.token, 'secret', (err, authData) => {
+        if (err) {
+            res.status(401).json({ msg: 'unauthorized' })
+        } else {
+            var product_category_id = req.body.product_category_id
+            var new_category_id = req.body.new_category_id
+            sequelize.sync().then(() => {
+                models.product_category.update({
+                    category_id: new_category_id
+                }, {
+                    where: {
+                        id: product_category_id
+                    }
+                })
+                .then((result) => {
+                    var affectedRow = result[0]
+                    if (affectedRow === 0) res.status(412).json({msg: 'updating failed due to invalid product_category id value'})
+                    else res.status(200).json({msg: 'update success'})
+                })
+            })
+        }
     })
 })
 
@@ -89,20 +96,26 @@ router.post('/updatecatprod', (req, res) => {
  * @access Private
  */
 
-router.post('/newprodcatrelation', (req, res) => {
-    var product_id = req.body.product_id
-    var category_id = req.body.category_id
-    sequelize.sync().then(() => {
-        models.product_category.create({
-            product_id: product_id,
-            category_id: category_id
-        })
-        .then((result) => {
-            if (result) res.status(200).json({ msg: 'update success' })
-        })
-        .catch((error) => {
-            if (error) res.status(412).json({msg: 'creating failed due to invalid product_id/category_id value' })
-        })
+router.post('/newprodcatrelation', verifyToken, (req, res) => {
+    jwt.verify(req.token, 'secret', (err, authData) => {
+        if (err) {
+            res.status(401).json({ msg: 'unauthorized' })
+        } else {
+            var product_id = req.body.product_id
+            var category_id = req.body.category_id
+            sequelize.sync().then(() => {
+                models.product_category.create({
+                    product_id: product_id,
+                    category_id: category_id
+                })
+                .then((result) => {
+                    if (result) res.status(200).json({ msg: 'update success' })
+                })
+                .catch((error) => {
+                    if (error) res.status(412).json({msg: 'creating failed due to invalid product_id/category_id value' })
+                })
+            })
+        }
     })
 })
 
@@ -113,15 +126,21 @@ router.post('/newprodcatrelation', (req, res) => {
  * @access Private
  */
 
-router.post('/deletecertainrelation', (req, res) => {
-    var prodcat_id = req.body.prodcat_id
-    models.product_category.destroy({
-        where: {
-            id: prodcat_id
+router.post('/deletecertainrelation', verifyToken, (req, res) => {
+    jwt.verify(req.token, 'secret', (err, authData) => {
+        if (err) {
+            res.status(401).json({ msg: 'unauthorized' })
+        } else {
+            var prodcat_id = req.body.prodcat_id
+            models.product_category.destroy({
+                where: {
+                    id: prodcat_id
+                }
+            })
+            .then((result) => {
+                if (result) res.status(200).json({msg: 'deleting success'})
+            })
         }
-    })
-    .then((result) => {
-        if (result) res.status(200).json({msg: 'deleting success'})
     })
 })
 

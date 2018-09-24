@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+const verifyToken = require ('../config/key/verifyToken');
 const sequelize = require('../config/db/Sequelize');
 const models = require('../models/relation/relation');
 
@@ -103,97 +105,103 @@ router.get('/product_test5', (req, res) => {
  * @access Private
  */ 
 
-router.post('/createproduct', (req, res) => {
-    const product_name = req.body.product_name // for product model
-    var product_category = req.body.product_category // for product_category model
-    const product_quantity = req.body.product_quantity // for product_code model
-    // console.log(product_name)
-    // console.log(product_category)
-    // console.log(product_quantity)
-    
-    sequelize.sync().then(() => {
-            // This is the beginning of inserting new data into product model
-            models.product.create({
-                product_name: product_name
-            })
-            .then((result) => {
-                const ProdCatCode = async () => {
-                    const product_id = result.id
-                    const prod_cat = product_category.split(', ')
-                    // console.log(prod_cat)
+router.post('/createproduct', verifyToken, (req, res) => {
+    jwt.verify(req.token, 'secret', (err, authData) => {
+        if (err) {
+            res.status(401).json({ msg: 'unauthorized' })
+        } else {
+            const product_name = req.body.product_name // for product model
+            var product_category = req.body.product_category // for product_category model
+            const product_quantity = req.body.product_quantity // for product_code model
+            // console.log(product_name)
+            // console.log(product_category)
+            // console.log(product_quantity)
+            
+            sequelize.sync().then(() => {
+                // This is the beginning of inserting new data into product model
+                models.product.create({
+                    product_name: product_name
+                })
+                .then((result) => {
+                    const ProdCatCode = async () => {
+                        const product_id = result.id
+                        const prod_cat = product_category.split(', ')
+                        // console.log(prod_cat)
 
-                    // this is the beginning of creating relation between product_id and category_id in product_category model
-                    const ForEachProdCat = (array) => {
-                        for (var i = 0; i < array.length; i++) {
-                            // console.log(array[i])
-                            models.product_category.create({
-                                product_id: product_id,
-                                category_id: array[i],
-                            });
-                        };
-                    }
+                        // this is the beginning of creating relation between product_id and category_id in product_category model
+                        const ForEachProdCat = (array) => {
+                            for (var i = 0; i < array.length; i++) {
+                                // console.log(array[i])
+                                models.product_category.create({
+                                    product_id: product_id,
+                                    category_id: array[i],
+                                });
+                            };
+                        }
 
-                    // this is the beginning of creating product_code and insert it into product_code model
-                    const ForEachProdCode = async (listed_code) => {
-                        for (var k = 0; k < listed_code.length; k++) {
-                            await models.product_code.create({
-                                product_id: product_id,
-                                product_code: listed_code[k]
+                        // this is the beginning of creating product_code and insert it into product_code model
+                        const ForEachProdCode = async (listed_code) => {
+                            for (var k = 0; k < listed_code.length; k++) {
+                                await models.product_code.create({
+                                    product_id: product_id,
+                                    product_code: listed_code[k]
+                                })
+                            }
+                            res.status(200).json({msg: 'Insert Product, Product_Code and Product_Category Success'})
+                        }
+
+                        // product_code generator. Generate code first, then insert into product_code model by calling ForEachProdCode function
+                        const code_generator = (quantity) => {
+                            const code_maker = (last_code) => {
+                                var sampel = '0000'
+                                var code_list = []
+
+                                var convertedLastCode = last_code
+
+                                for (var i = 1; i <= quantity; i++) {
+                                    var new_code = convertedLastCode + i
+                                    var generated_code = new_code.toString()
+                                    var convertedLength = generated_code.length
+                                    var final_code = sampel.slice(0, (sampel.length - convertedLength)) + generated_code
+                                    // console.log(generated_code)
+                                    // console.log(convertedLength)
+                                    // console.log(final_code)
+                                    
+                                    code_list.push(final_code)
+                                }
+                                ForEachProdCode(code_list)
+                            }
+
+                            models.product_code.findAll({
+                                limit: 1,
+                                order: [['id', 'DESC']],
+                                attributes: ['product_code']
+                            })
+                            .then((result) => {
+                                // console.log(result)
+                                var get_last_code = (result.length === 0) ? 0 : result[0].product_code
+                                // console.log(result[0].product_code)
+                                // Note: check first, if this is the first data, then the last code is zero (0)
+
+                                var last_code = parseInt(get_last_code, 10)
+                                code_maker(last_code)
                             })
                         }
-                        res.status(200).json({msg: 'Insert Product, Product_Code and Product_Category Success'})
+
+                        await ForEachProdCat(prod_cat)
+                        code_generator(product_quantity)
                     }
-
-                    // product_code generator. Generate code first, then insert into product_code model by calling ForEachProdCode function
-                    const code_generator = (quantity) => {
-                        const code_maker = (last_code) => {
-                            var sampel = '0000'
-                            var code_list = []
-
-                            var convertedLastCode = last_code
-
-                            for (var i = 1; i <= quantity; i++) {
-                                var new_code = convertedLastCode + i
-                                var generated_code = new_code.toString()
-                                var convertedLength = generated_code.length
-                                var final_code = sampel.slice(0, (sampel.length - convertedLength)) + generated_code
-                                // console.log(generated_code)
-                                // console.log(convertedLength)
-                                // console.log(final_code)
-                                
-                                code_list.push(final_code)
-                            }
-                            ForEachProdCode(code_list)
-                        }
-
-                        models.product_code.findAll({
-                            limit: 1,
-                            order: [['id', 'DESC']],
-                            attributes: ['product_code']
-                        })
-                        .then((result) => {
-                            // console.log(result)
-                            var get_last_code = (result.length === 0) ? 0 : result[0].product_code
-                            // console.log(result[0].product_code)
-                            // Note: check first, if this is the first data, then the last code is zero (0)
-
-                            var last_code = parseInt(get_last_code, 10)
-                            code_maker(last_code)
-                        })
-                    }
-
-                    await ForEachProdCat(prod_cat)
-                    code_generator(product_quantity)
-                }
-                ProdCatCode()
+                    ProdCatCode()
+                })
             })
+        }
     })
 })
 
 /**
  * @route GET product/readproduct
  * @desc Read Product Model only
- * @access Private
+ * @access Public
  */
 
 router.get('/readproduct', (req, res) => {
@@ -212,26 +220,32 @@ router.get('/readproduct', (req, res) => {
  * @access Private
  */
 
-router.post('/updateproduct', (req, res) => {
-    var new_product_name = req.body.new_product_name
-    var product_id = req.body.product_id
-    // console.log(product_name)
-    // console.log(product_id)
-    
-    sequelize.sync().then(() => {
-        models.product.update({
-            product_name: new_product_name
-        },
-        {
-            where: {
-                id: product_id
-            }
-        })
-        .then((result) => {
-            var affectedRow = result[0]
-            if (affectedRow === 0) res.status(412).json({msg: 'updating failed due to invalid product id value'})
-            else res.status(200).json({msg: 'update success'})
-        })
+router.post('/updateproduct', verifyToken, (req, res) => {
+    jwt.verify(req.token, 'secret', (err, authData) => {
+        if (err) {
+            res.status(401).json({ msg: 'unauthorized' })
+        } else {
+            var new_product_name = req.body.new_product_name
+            var product_id = req.body.product_id
+            // console.log(product_name)
+            // console.log(product_id)
+            
+            sequelize.sync().then(() => {
+                models.product.update({
+                    product_name: new_product_name
+                },
+                {
+                    where: {
+                        id: product_id
+                    }
+                })
+                .then((result) => {
+                    var affectedRow = result[0]
+                    if (affectedRow === 0) res.status(412).json({msg: 'updating failed due to invalid product id value'})
+                    else res.status(200).json({msg: 'update success'})
+                })
+            })
+        }
     })
 })
 
@@ -241,46 +255,52 @@ router.post('/updateproduct', (req, res) => {
  * @access Private
  */
 
-router.post('/deleteproduct', (req, res) => {
-    var product_id = req.body.product_id
-    // console.log(product_id)
-    
-    sequelize.sync().then(() => {
-        // delete product
-        const deleteproduct = async () => {
-            // delete product_code
-            await models.product_code.destroy({
-                where: {
-                    product_id: product_id
-                }
-            })
+router.post('/deleteproduct', verifyToken, (req, res) => {
+    jwt.verify(req.token, 'secret', (err, authData) => {
+        if (err) {
+            res.status(401).json({ msg: 'unauthorized' })
+        } else {
+            var product_id = req.body.product_id
+            // console.log(product_id)
+            
+            sequelize.sync().then(() => {
+                // delete product
+                const deleteproduct = async () => {
+                    // delete product_code
+                    await models.product_code.destroy({
+                        where: {
+                            product_id: product_id
+                        }
+                    })
 
-            // delete product_category
-            await models.product_category.destroy({
-                where: {
-                    product_id: product_id
-                }
-            })
+                    // delete product_category
+                    await models.product_category.destroy({
+                        where: {
+                            product_id: product_id
+                        }
+                    })
 
-            await models.product.destroy({
-                where: {
-                    id: product_id
+                    await models.product.destroy({
+                        where: {
+                            id: product_id
+                        }
+                    })
+                    .then((result) => {
+                        var affectedRow = [{result}]
+                        if (affectedRow[0].result === 0) res.status(412).json({msg: 'deleting failed due to invalid product id value'})
+                        else res.status(200).json({msg: 'delete success'})
+                    })
                 }
-            })
-            .then((result) => {
-                var affectedRow = [{result}]
-                if (affectedRow[0].result === 0) res.status(412).json({msg: 'deleting failed due to invalid product id value'})
-                else res.status(200).json({msg: 'delete success'})
+                deleteproduct()
             })
         }
-        deleteproduct()
     })
 })
 
 /**
  * @route GET product/allproductinfo
  * @desc Get all product info, product name, product category, product code
- * @access Private
+ * @access Public
  */
 
 router.get('/allproductinfo', (req, res) => {
