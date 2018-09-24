@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const sequelize = require('../config/db/Sequelize');
-const models = require('../models/relation/relation')
+const models = require('../models/relation/relation');
 
 /**
  * @route GET api/category/test
